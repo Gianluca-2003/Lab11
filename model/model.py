@@ -1,15 +1,21 @@
+import copy
+
 import networkx as nx
 
 from database.DAO import DAO
+from model.product import Product
 
 
 class Model:
     def __init__(self):
+        self._archi_usati = None
         self._mapNodiRipeuti = {}
         self._nodes = []
         self._edges = []
         self._graph = nx.Graph()
         self._IdMapProd = {}
+        self._solBest = 0
+        self._bestPath = []
 
 
 
@@ -38,6 +44,7 @@ class Model:
         for arco in self._edges:
             if arco.p1 in self._graph and arco.p2 in self._graph:
                 self._graph.add_edge(arco.p1, arco.p2, width=arco.peso)
+
 
     def getSortArchiByPeso(self):
         self._edges = sorted(self._edges, key=lambda x: x.peso, reverse=True)
@@ -72,6 +79,32 @@ class Model:
 
 
 
+    def trovaPercorsoOpt(self,source : Product):
+        self._solBest = 0
+        self._bestPath = []
+        self._archi_usati = set()
+        self.ricorsione([source],[], 0, self._archi_usati)
+        return self._bestPath
+
+
+    def ricorsione(self,parziale_list: list,parziale_edges: list,  peso_prec, archi_usati: set):
+        if len(parziale_edges) > len(self._bestPath):
+            self._bestPath = copy.deepcopy(parziale_edges)
+        ultimo = parziale_list[-1]
+        for vicino in self._graph.neighbors(ultimo):
+            arco_ord = tuple(sorted((ultimo, vicino), key=lambda x: x.Product_number))
+            if arco_ord not in archi_usati:
+                peso = self._graph[ultimo][vicino]['width']
+                if peso >= peso_prec:
+                    parziale_list.append(vicino)
+                    archi_usati.add(arco_ord)
+                    parziale_edges.append(arco_ord)
+                    self.ricorsione(parziale_list, parziale_edges, peso, archi_usati)
+                    parziale_list.pop()
+                    parziale_edges.pop()
+                    archi_usati.remove(arco_ord)
+
+
 
 
 
@@ -94,3 +127,5 @@ class Model:
     @property
     def getNumEdges(self):
         return len(self._graph.edges)
+
+

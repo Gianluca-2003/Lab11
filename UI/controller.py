@@ -28,13 +28,13 @@ class Controller:
     def handle_graph(self, e):
         #creo il grafo
         color = self._view._ddcolor.value
-        if color == "":
+        if color is None:
             self._view.txtOut.controls.clear()
             self._view.txtOut.controls.append(ft.Text("Seleziona un colore per procedere", color="red"))
             self._view.update_page()
             return
         yearInput = self._view._ddyear.value
-        if yearInput == "":
+        if yearInput is None:
             self._view.txtOut.controls.clear()
             self._view.txtOut.controls.append(ft.Text("Seleziona un anno per procedere", color="red"))
             self._view.update_page()
@@ -58,10 +58,10 @@ class Controller:
                 self._view.txtOut.controls.append(ft.Text(f"{nodo}", color="blue"))
 
 
+        self._view._ddnode.disabled = False
+        self._view.btn_search.disabled = False
+
         self.fillDDProduct()
-
-
-
         self._view.update_page()
 
 
@@ -81,4 +81,20 @@ class Controller:
 
 
     def handle_search(self, e):
-        pass
+        if self._prod is None:
+            self._view.txtOut2.controls.clear()
+            self._view.txtOut2.controls.append(ft.Text("Scegli un prodotto per procedere",color="red"))
+            self._view.update_page()
+            return
+        bestPath = self._model.trovaPercorsoOpt(self._prod)
+        if len(bestPath) == 0:
+            self._view.txtOut2.controls.clear()
+            self._view.txtOut2.controls.append(ft.Text("Nessun percorso disponibile"))
+            self._view.update_page()
+            return
+        else:
+            self._view.txtOut2.controls.clear()
+            self._view.txtOut2.controls.append(ft.Text(f"Numero di archi percorso piu lungo: {len(bestPath)}", color="blue"))
+            self._view.update_page()
+
+
